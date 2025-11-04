@@ -25,8 +25,8 @@ while running:
     screen.fill((0, 0, 0))
     player.direction = player.velocity.normalize()
 
-    print(player.velocity.x)
-    print(player.velocity.y)
+    print("vx: ", player.velocity.x)
+    print("vy: ", player.velocity.y)
     
     
     for event in pygame.event.get():
@@ -56,13 +56,13 @@ while running:
             
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_w:
-                w_pressed = False
+                config.w_pressed = False
             elif event.key == pygame.K_s:
-                s_pressed = False
+                config.s_pressed = False
             elif event.key == pygame.K_a:
-                a_pressed = False
+                config.a_pressed = False
             elif event.key == pygame.K_d:
-                d_pressed = False
+                config.d_pressed = False
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()  
@@ -70,16 +70,20 @@ while running:
     
 
     if config.w_pressed and player.velocity.y > -player.max_speed:
+        print("w")
         player.velocity.y -= player.acceleration
 
     if config.a_pressed and player.velocity.x > -player.max_speed:
         player.velocity.x -= player.acceleration
+        print("a")
 
     if config.s_pressed and player.velocity.y < player.max_speed:
         player.velocity.y += player.acceleration
+        print("s")
 
     if config.d_pressed and player.velocity.x < player.max_speed:
         player.velocity.x += player.acceleration
+        print("d")
 
 
 
