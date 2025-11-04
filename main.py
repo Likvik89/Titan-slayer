@@ -14,7 +14,12 @@ width, height = screen.get_size()
 
 
 
-player = players("rect", 20, 100, 100, 0.1, 0.1)
+player = players("rect", 20, 100, 100, 0.1, 0.01)
+
+#player_img = pygame.image.load("img/player.png").convert_alpha()
+#player_img = pygame.transform.scale(player_img, (200, 150))
+
+
 
 #print(player.direction.angle_to(Vector2(1,1)))
 
@@ -23,10 +28,7 @@ player = players("rect", 20, 100, 100, 0.1, 0.1)
 running = True
 while running:   
     screen.fill((0, 0, 0))
-    player.direction = player.velocity.normalize()
 
-    print("vx: ", player.velocity.x)
-    print("vy: ", player.velocity.y)
     
     
     for event in pygame.event.get():
@@ -69,27 +71,26 @@ while running:
             mouse_x, mouse_y = pygame.mouse.get_pos()
     
 
-    if config.w_pressed and player.velocity.y > -player.max_speed:
-        print("w")
-        player.velocity.y -= player.acceleration
+    sped = 1
+    if config.w_pressed:
+        player.direction.y -= sped
 
-    if config.a_pressed and player.velocity.x > -player.max_speed:
-        player.velocity.x -= player.acceleration
-        print("a")
+    if config.a_pressed:
+        player.direction.x -= sped
 
-    if config.s_pressed and player.velocity.y < player.max_speed:
-        player.velocity.y += player.acceleration
-        print("s")
+    if config.s_pressed:
+        player.direction.y += sped
 
-    if config.d_pressed and player.velocity.x < player.max_speed:
-        player.velocity.x += player.acceleration
-        print("d")
+    if config.d_pressed:
+        player.direction.x += sped
 
 
-
+    player.velocity = player.direction.normalize() * 0.1
     player.position.x += player.velocity.x
     player.position.y += player.velocity.y
     pygame.draw.rect(screen, (0, 255, 0), (player.position.x, player.position.y, player.size, player.size))
+    #print(player.position.x)
+    #print(player.position.y)
     
         
     pygame.display.flip()
