@@ -71,7 +71,7 @@ while running:
             mouse_x, mouse_y = pygame.mouse.get_pos()
     
 
-    sped = 1
+    sped = 0.005
     if config.w_pressed:
         player.direction.y -= sped
 
@@ -84,8 +84,21 @@ while running:
     if config.d_pressed:
         player.direction.x += sped
 
+    
+    if player.position.x < 0:
+        player.position.x = width - player.size
+    if player.position.x > width - player.size:
+        player.position.x = 0
+    if player.position.y < 0:
+        player.position.y = height - player.size
+    if player.position.y > height - player.size:
+        player.position.y = 0
 
-    player.velocity = player.direction.normalize() * 0.1
+    player.direction = player.direction.normalize()
+
+    print(player.direction)
+
+    player.velocity = player.direction * 0.3
     player.position.x += player.velocity.x
     player.position.y += player.velocity.y
     pygame.draw.rect(screen, (0, 255, 0), (player.position.x, player.position.y, player.size, player.size))
