@@ -1,6 +1,7 @@
 import pygame
 from pygame.math import *
 import config
+from config import players
 
 
 
@@ -13,15 +14,19 @@ width, height = screen.get_size()
 
 
 
-player = players("rect", 20, 10, 10)
+player = players("rect", 20, 100, 100, 0.1, 0.1)
+
+#print(player.direction.angle_to(Vector2(1,1)))
 
 
-
-screen.fill((0, 0, 0))
 
 running = True
 while running:   
+    screen.fill((0, 0, 0))
+    player.direction = player.velocity.normalize()
 
+    print(player.velocity.x)
+    print(player.velocity.y)
     
     
     for event in pygame.event.get():
@@ -31,14 +36,22 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
+
             if event.key == pygame.K_w:  
-                w_pressed = True
+                config.w_pressed = True
+
+
             if event.key == pygame.K_s:  
-                s_pressed = True
+                config.s_pressed = True
+
+
             if event.key == pygame.K_a:  
-                a_pressed = True
+                config.a_pressed = True
+
+
             if event.key == pygame.K_d:  
-                d_pressed = True
+                config.d_pressed = True
+
 
             
         if event.type == pygame.KEYUP:
@@ -56,7 +69,23 @@ while running:
             mouse_x, mouse_y = pygame.mouse.get_pos()
     
 
-    #pygame.draw.rect(screen, (0, 255, 0), (player.x, player.y, player.size, player.size))
+    if config.w_pressed and player.velocity.y > -player.max_speed:
+        player.velocity.y -= player.acceleration
+
+    if config.a_pressed and player.velocity.x > -player.max_speed:
+        player.velocity.x -= player.acceleration
+
+    if config.s_pressed and player.velocity.y < player.max_speed:
+        player.velocity.y += player.acceleration
+
+    if config.d_pressed and player.velocity.x < player.max_speed:
+        player.velocity.x += player.acceleration
+
+
+
+    player.position.x += player.velocity.x
+    player.position.y += player.velocity.y
+    pygame.draw.rect(screen, (0, 255, 0), (player.position.x, player.position.y, player.size, player.size))
     
         
     pygame.display.flip()
