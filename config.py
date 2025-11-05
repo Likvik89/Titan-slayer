@@ -7,8 +7,9 @@ class collisionbox():
         self.area_type = area_type
         self.size = size
         self.position = Vector2(position_x, position_y)
-        self.velocity = Vector2(0, 0)
+        self.velocity = Vector2(5, 0)
         self.direction = Vector2(0, 0)
+        self.wish_direction = Vector2(0,0)
 
 
 
@@ -16,7 +17,7 @@ class players(collisionbox):
     def __init__(self, area_type,  size, position_x, position_y, speed, max_range):
         super().__init__(area_type, size, position_x, position_y)
         self.boost_speed = speed
-        self.is_grappling = False
+        self.is_grappling = True
         self.max_grapple_range = max_range
 
 
