@@ -122,57 +122,39 @@ while running:
     boost()
     #looP()
 
-    string_color = (0, 255, 0) #green
+    # compute vector from grapple to player once
+    delta = player.position - grapple_position
+    dist = delta.length()
 
-    if (player.position.distance_to(grapple_position) > player.max_grapple_range) and player.is_grappling:
+    # string color and range handling
+    string_color = (0, 255, 0)
+    if player.is_grappling and dist > player.max_grapple_range:
+        string_color = (255, 0, 0)
 
-        string_color = (255, 0, 0) #rød
+        # clamp position to the rope circle (soft / gradual correction)
+        if dist > 0:
+            normal = delta.normalize()            # outward normal from grapple -> player
+            overlap = dist - player.max_grapple_range
 
-        grapple_vector =  grapple_position - player.position
+            # SOFT POSITION CORRECTION: move a fraction of the overlap so it's not an instant teleport
+            softness = 0.2          # 0 < softness <= 1 (smaller = softer)
+            player.position -= normal * (overlap * softness)
 
-        #lastangle = angle
+            # PRESERVE TANGENTIAL VELOCITY: split velocity into radial and tangential parts
+            radial_speed = player.velocity.dot(normal)
+            radial = normal * radial_speed
+            tangential = player.velocity - radial
 
+            # If radial component points outward, damp it instead of zeroing it
+            if radial_speed > 0:
+                radial *= 0.2     # keep a small fraction of outward radial velocity (0 = kill, 1 = keep)
+            # else if radial_speed <= 0 it's inward and we can keep it (or damp less)
 
-        #cos(v) = (a*b)/(lena*lenb)
-        if player.velocity != [0,0]:
-            lena = grapple_vector.length()
+            player.velocity = tangential + radial
 
-            lenb = player.velocity.length()
-            dp = player.velocity.dot(grapple_vector)
-
-
-            if player.wish_direction != [0,0]:
-                lenb = player.wish_direction.length()
-                dp = player.wish_direction.dot(grapple_vector)
-
-            cosv = dp/(lena * lenb)
-
-            angle = math.acos(cosv)
-            angle = math.degrees(angle)
-            
-            if time == 10:
-                print()
-                print(angle)
-                print(player.position)
-                print()
-                
-
-        if angle > 180:
-            player.direction = -Vector2(-grapple_vector.y, grapple_vector.x).normalize()
-            #print("left")
-
+            # small global damping to remove residual oscillation (tweak value)
+            player.velocity *= 0.995
         
-        elif angle < 181:
-            player.direction = Vector2(-grapple_vector.y, grapple_vector.x).normalize()
-            #print("right")
-        
-        player.direction = player.direction * player.velocity.length()
-
-
-
-        player.velocity = player.direction
-
-
 
 
     player.position += player.velocity
@@ -183,7 +165,8 @@ while running:
 
     pygame.draw.rect(screen, (0, 255, 0), (player.position.x, player.position.y, player.size, player.size))
     
-    if player.wish_direction != [0,0]:
+    # draw wish direction only if nonzero
+    if player.wish_direction.length_squared() != 0:
         pygame.draw.line(screen, (255, 255, 0), (player.position.x + player.size/2, player.position.y + player.size/2), (Vector2(player.position.x + player.size/2, player.position.y + player.size/2) + player.wish_direction.normalize()*88 ), 1)
 
     if time >= 10:
