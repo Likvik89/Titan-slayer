@@ -18,7 +18,7 @@ player = players("rect", #areatype
                  200, #start position_x
                  300, #start position_y
                  1/8, #boost_speed
-                 300 #max grapple range
+                 0 #max grapple range
                  )
 
 #player_img = pygame.image.load("img/player.png").convert_alpha()
@@ -69,6 +69,8 @@ while running:
     time += 1
 
     player.wish_direction = Vector2(0,0)
+    grapple_vector = grapple_position - player.position
+
 
     if player.velocity.length() != 0:
         player.direction = player.velocity.normalize()
@@ -122,42 +124,50 @@ while running:
     boost()
     #looP()
 
-    # compute vector from grapple to player once
-    delta = player.position - grapple_position
-    dist = delta.length()
+    string_color = (0, 255, 0) #green
 
-    # string color and range handling
-    string_color = (0, 255, 0)
-    if player.is_grappling and dist > player.max_grapple_range:
-        string_color = (255, 0, 0)
+    if (player.position.distance_to(grapple_position) > player.max_grapple_range) and player.is_grappling and player.velocity != [0,0]:
 
-        # clamp position to the rope circle (soft / gradual correction)
-        if dist > 0:
-            normal = delta.normalize()            # outward normal from grapple -> player
-            overlap = dist - player.max_grapple_range
+        string_color = (255, 0, 0) #rød
 
-            # SOFT POSITION CORRECTION: move a fraction of the overlap so it's not an instant teleport
-            softness = 0.2          # 0 < softness <= 1 (smaller = softer)
-            player.position -= normal * (overlap * softness)
-
-            # PRESERVE TANGENTIAL VELOCITY: split velocity into radial and tangential parts
-            radial_speed = player.velocity.dot(normal)
-            radial = normal * radial_speed
-            tangential = player.velocity - radial
-
-            # If radial component points outward, damp it instead of zeroing it
-            if radial_speed > 0:
-                radial *= 0.2     # keep a small fraction of outward radial velocity (0 = kill, 1 = keep)
-            # else if radial_speed <= 0 it's inward and we can keep it (or damp less)
-
-            player.velocity = tangential + radial
-
-            # small global damping to remove residual oscillation (tweak value)
-            player.velocity *= 0.995
         
+        v1 = list(grapple_vector.as_polar())
+        v1 = v1[1]
+        v2 = list(player.velocity.as_polar())
+        v2 = v2[1]
+
+        velocity = player.velocity.rotate(-v2)
+        grapple = grapple_vector.rotate(-v2)
+
+
+        lena = grapple.length()
+        lenb = velocity.length()
+        dp = velocity.dot(grapple)
+        cosv = dp/(lena * lenb)
+        angle = math.acos(cosv)
+        angle = math.degrees(angle)
+
+
+        #print(angle)
+        #print(velocity.as_polar())
+
+
+        if grapple.y > 0:
+            player.direction = -Vector2(-grapple_vector.y, grapple_vector.x).normalize()
+            #print("left")
+        
+        if grapple.y < 0:
+            player.direction = Vector2(-grapple_vector.y, grapple_vector.x).normalize()
+            #print("right")
+
+        player.direction = player.direction * player.velocity.length()
+        player.velocity = player.direction
+
 
 
     player.position += player.velocity
+
+    #sprint(player.velocity.as_polar())
     
     if player.is_grappling:
         pygame.draw.line(screen, string_color, (player.position.x + player.size/2, player.position.y + player.size/2), grapple_position, 1)
@@ -165,15 +175,19 @@ while running:
 
     pygame.draw.rect(screen, (0, 255, 0), (player.position.x, player.position.y, player.size, player.size))
     
-    # draw wish direction only if nonzero
-    if player.wish_direction.length_squared() != 0:
+    if player.wish_direction != [0,0]:
         pygame.draw.line(screen, (255, 255, 0), (player.position.x + player.size/2, player.position.y + player.size/2), (Vector2(player.position.x + player.size/2, player.position.y + player.size/2) + player.wish_direction.normalize()*88 ), 1)
+    
+    if player.velocity != [0,0]:
+        pygame.draw.line(screen, (0, 0, 255), (player.position.x + player.size/2, player.position.y + player.size/2), (Vector2(player.position.x + player.size/2, player.position.y + player.size/2) + player.velocity.normalize()*88 ), 1)
+
 
     if time >= 10:
         time = 0
     
     pygame.display.flip()
     clock.tick(60)
-    
+
+
 
 pygame.quit()
