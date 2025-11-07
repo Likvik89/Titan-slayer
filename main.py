@@ -14,14 +14,14 @@ width, height = screen.get_size()
 
 
 player = players("rect", #areatype
-                 20, #size
+                 10, #size
                  200, #start position_x
                  300, #start position_y
                  1/8, #boost_speed
-                 0 #max grapple range
+                 200 #max grapple range
                  )
 
-#player_img = pygame.image.load("img/player.png").convert_alpha()
+
 #player_img = pygame.transform.scale(player_img, (200, 150))
 
 grapple_position = Vector2(400, 400)
@@ -121,8 +121,11 @@ while running:
             player.is_grappling = False
         
     
-    boost()
-    #looP()
+    v = list(player.velocity.as_polar())
+    v = v[1]
+
+    #player.image = pygame.transform.rotate(player.image, (lastangle-v))
+    lastangle = v
 
     string_color = (0, 255, 0) #green
 
@@ -131,25 +134,9 @@ while running:
         string_color = (255, 0, 0) #rød
 
         
-        v1 = list(grapple_vector.as_polar())
-        v1 = v1[1]
-        v2 = list(player.velocity.as_polar())
-        v2 = v2[1]
 
-        velocity = player.velocity.rotate(-v2)
-        grapple = grapple_vector.rotate(-v2)
-
-
-        lena = grapple.length()
-        lenb = velocity.length()
-        dp = velocity.dot(grapple)
-        cosv = dp/(lena * lenb)
-        angle = math.acos(cosv)
-        angle = math.degrees(angle)
-
-
-        #print(angle)
-        #print(velocity.as_polar())
+        velocity = player.velocity.rotate(-v)
+        grapple = grapple_vector.rotate(-v)
 
 
         if grapple.y > 0:
@@ -160,26 +147,28 @@ while running:
             player.direction = Vector2(-grapple_vector.y, grapple_vector.x).normalize()
             #print("right")
 
-        player.direction = player.direction * player.velocity.length()
+        player.direction = player.direction * player.velocity.length()# * math.cos(v)
         player.velocity = player.direction
 
 
-
+    boost()
     player.position += player.velocity
 
-    #sprint(player.velocity.as_polar())
+
     
     if player.is_grappling:
         pygame.draw.line(screen, string_color, (player.position.x + player.size/2, player.position.y + player.size/2), grapple_position, 1)
         #player.position = (new_grapple_vector.normalize() * player.max_grapple_range) + grapple_position
 
-    pygame.draw.rect(screen, (0, 255, 0), (player.position.x, player.position.y, player.size, player.size))
+    #pygame.draw.rect(screen, (0, 255, 0), (player.position.x, player.position.y, player.size, player.size))
     
-    if player.wish_direction != [0,0]:
-        pygame.draw.line(screen, (255, 255, 0), (player.position.x + player.size/2, player.position.y + player.size/2), (Vector2(player.position.x + player.size/2, player.position.y + player.size/2) + player.wish_direction.normalize()*88 ), 1)
+    #if player.wish_direction != [0,0]:
+     #   pygame.draw.line(screen, (255, 255, 0), (player.position.x + player.size/2, player.position.y + player.size/2), (Vector2(player.position.x + player.size/2, player.position.y + player.size/2) + player.wish_direction.normalize()*88 ), 1)
     
     if player.velocity != [0,0]:
-        pygame.draw.line(screen, (0, 0, 255), (player.position.x + player.size/2, player.position.y + player.size/2), (Vector2(player.position.x + player.size/2, player.position.y + player.size/2) + player.velocity.normalize()*88 ), 1)
+        pygame.draw.line(screen, (0, 0, 255), (player.position.x + player.size/2, player.position.y + player.size/2), (Vector2(player.position.x + player.size/2, player.position.y + player.size/2) + player.velocity*20 ), 1)
+
+    screen.blit(player.image, (player.position.x - player.size/2, player.position.y - player.size/2))        
 
 
     if time >= 10:

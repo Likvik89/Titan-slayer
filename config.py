@@ -17,9 +17,9 @@ class players(collisionbox):
     def __init__(self, area_type,  size, position_x, position_y, speed, max_range):
         super().__init__(area_type, size, position_x, position_y)
         self.boost_speed = speed
-        self.is_grappling = True      # start not grappling
+        self.is_grappling = False
         self.max_grapple_range = max_range
-
+        self.image = pygame.image.load("img/player.png").convert_alpha()
 
 
 
