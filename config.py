@@ -7,8 +7,9 @@ class collisionbox():
         self.area_type = area_type
         self.size = size
         self.position = Vector2(position_x, position_y)
-        self.velocity = Vector2(0, 0)
+        self.velocity = Vector2(0, 0)   # stopped by default
         self.direction = Vector2(0, 0)
+        self.wish_direction = Vector2(0,0)
 
 
 
@@ -18,7 +19,7 @@ class players(collisionbox):
         self.boost_speed = speed
         self.is_grappling = False
         self.max_grapple_range = max_range
-
+        self.image = pygame.image.load("img/player.png").convert_alpha()
 
 
 
