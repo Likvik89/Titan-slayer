@@ -14,52 +14,18 @@ width, height = screen.get_size()
 
 
 player = players("rect", #areatype
-                 10, #size
+                 50, #size
                  200, #start position_x
                  300, #start position_y
+                 pygame.image.load("img/player.png").convert_alpha(), #image
                  1/8, #boost_speed
-                 200 #max grapple range
+                 300, #max grapple range
+                 20 # turnspeed
                  )
-
-
-#player_img = pygame.transform.scale(player_img, (200, 150))
-
-grapple_position = Vector2(400, 400)
-new_grapple_vector = Vector2()
-
-def boost():
-    if config.w_pressed:
-        player.velocity.y -= player.boost_speed
-        player.wish_direction.y -= player.boost_speed
-        
-
-    if config.a_pressed:
-        player.velocity.x -= player.boost_speed
-        player.wish_direction.x -= player.boost_speed
-
-    if config.s_pressed:
-        player.velocity.y += player.boost_speed
-        player.wish_direction.y += player.boost_speed
-
-    if config.d_pressed:
-        player.velocity.x += player.boost_speed
-        player.wish_direction.x += player.boost_speed
+player.orig_image = player.image.copy()
 
 
 
-def looP():
-    if player.position.x < 0:
-        player.position.x = width - player.size
-    if player.position.x > width - player.size:
-        player.position.x = 0
-    if player.position.y < 0:
-        player.position.y = height - player.size
-    if player.position.y > height - player.size:
-        player.position.y = 0
-
-
-angle = 0
-lastangle = 0
 time = 0
 
 clock = pygame.time.Clock()
@@ -68,8 +34,11 @@ while running:
     screen.fill((0, 0, 0))
     time += 1
 
-    player.wish_direction = Vector2(0,0)
-    grapple_vector = grapple_position - player.position
+
+    grapple_vector = config.grapple_position - player.position
+    config.mouse_pos = Vector2(pygame.mouse.get_pos())
+    config.mouse_direction = Vector2(config.mouse_pos - player.position)
+    
 
 
     if player.velocity.length() != 0:
@@ -97,6 +66,10 @@ while running:
 
             if event.key == pygame.K_d:  
                 config.d_pressed = True
+            
+            if event.key == pygame.K_SPACE:
+                config.grapple_position = config.mouse_pos
+                player.is_grappling = True
 
 
             
@@ -109,66 +82,102 @@ while running:
                 config.a_pressed = False
             elif event.key == pygame.K_d:
                 config.d_pressed = False
+            elif event.key == pygame.K_SPACE:
+                player.is_grappling = False
             
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            config.mouse_pos = pygame.mouse.get_pos()  
-            config.mouse_x, config.mouse_y = pygame.mouse.get_pos()
-            grapple_position = Vector2(config.mouse_pos)
+            config.grapple_position = config.mouse_pos
             player.is_grappling = True
         
         elif event.type == pygame.MOUSEBUTTONUP:
             player.is_grappling = False
         
     
-    v = list(player.velocity.as_polar())
-    v = v[1]
+    
+    
 
-    #player.image = pygame.transform.rotate(player.image, (lastangle-v))
-    lastangle = v
+    string_color = (0, 255, 0) #grøn
 
-    string_color = (0, 255, 0) #green
-
-    if (player.position.distance_to(grapple_position) > player.max_grapple_range) and player.is_grappling and player.velocity != [0,0]:
+    if (player.position.distance_to(config.grapple_position) > player.max_grapple_range) and player.is_grappling and player.velocity != [0,0]:
 
         string_color = (255, 0, 0) #rød
 
-        
+        #Roterer vektorerne, så vinkeln mellem dem er ens, men player.velocity er vandret
+        velocity = player.velocity.rotate(-list(player.velocity.as_polar())[1])
+        grapple = grapple_vector.rotate(-list(player.velocity.as_polar())[1])
 
-        velocity = player.velocity.rotate(-v)
-        grapple = grapple_vector.rotate(-v)
-
+        #Beregner vinklen mellem vektorerne
+        leng = grapple.length()
+        lenv = (velocity).length()
+        dp = grapple.dot(velocity)
+        cosv = dp/(lenv*leng)
+        cosv = max(-1.0, min(1.0, cosv))
+        sinv = math.sin(math.acos(cosv))
 
         if grapple.y > 0:
-            player.direction = -Vector2(-grapple_vector.y, grapple_vector.x).normalize()
-            #print("left")
-        
+            velocity = -Vector2(-grapple_vector.y, grapple_vector.x).normalize()
+            
         if grapple.y < 0:
-            player.direction = Vector2(-grapple_vector.y, grapple_vector.x).normalize()
-            #print("right")
+            velocity = Vector2(-grapple_vector.y, grapple_vector.x).normalize()
+        
+        velocity = velocity * player.velocity.length() * sinv
+        player.velocity = velocity
 
-        player.direction = player.direction * player.velocity.length()# * math.cos(v)
-        player.velocity = player.direction
 
-
-    boost()
+    player.boost()
     player.position += player.velocity
 
-
-    
     if player.is_grappling:
-        pygame.draw.line(screen, string_color, (player.position.x + player.size/2, player.position.y + player.size/2), grapple_position, 1)
-        #player.position = (new_grapple_vector.normalize() * player.max_grapple_range) + grapple_position
+        pygame.draw.line(screen, string_color, (player.position.x + player.size/2, player.position.y + player.size/2), config.grapple_position, 1)
 
-    #pygame.draw.rect(screen, (0, 255, 0), (player.position.x, player.position.y, player.size, player.size))
-    
-    #if player.wish_direction != [0,0]:
-     #   pygame.draw.line(screen, (255, 255, 0), (player.position.x + player.size/2, player.position.y + player.size/2), (Vector2(player.position.x + player.size/2, player.position.y + player.size/2) + player.wish_direction.normalize()*88 ), 1)
-    
     if player.velocity != [0,0]:
         pygame.draw.line(screen, (0, 0, 255), (player.position.x + player.size/2, player.position.y + player.size/2), (Vector2(player.position.x + player.size/2, player.position.y + player.size/2) + player.velocity*20 ), 1)
 
-    screen.blit(player.image, (player.position.x - player.size/2, player.position.y - player.size/2))        
+    
+    
+    if player.velocity.length_squared() > 1e-8:
+
+        leng = grapple_vector.length()
+        lenmd = (config.mouse_direction).length()
+        dp = grapple_vector.dot(config.mouse_direction)
+        cosv = dp/(lenmd*leng)
+        cosv = max(-1.0, min(1.0, cosv))
+        player.rotation = math.acos(cosv)
+        player.rotation = math.degrees(player.rotation) -180
+
+        if player.is_grappling:
+
+            if player.rotation > 90:
+                player.rotation = grapple_vector.as_polar()[1]
+            
+            if player.rotation < -90:
+                player.rotation = grapple_vector.as_polar()[1]
+
+        
+        player.rotation = -(config.mouse_direction).as_polar()[1] - 90
+ 
+
+        print("current angle: ", player.rotation)
+        print("last angle: ", config.last_viewing_angle)
+        if player.rotation - config.last_viewing_angle > player.turnspeed:
+            player.rotation = config.last_viewing_angle + player.turnspeed
+            print("right")
+
+        if player.rotation - config.last_viewing_angle < -player.turnspeed:
+            player.rotation = config.last_viewing_angle - player.turnspeed
+            print("left")
+
+    else:
+        player.rotation = 0.0
+    
+
+
+    rotated = pygame.transform.rotate(player.orig_image, player.rotation)
+    rot_rect = rotated.get_rect(center=(player.position.x + player.size/2, player.position.y + player.size/2))
+    screen.blit(rotated, rot_rect.topleft)
+
+    config.last_viewing_angle = player.rotation
 
 
     if time >= 10:

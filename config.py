@@ -3,23 +3,40 @@ from pygame.math import *
 
 
 class collisionbox():
-    def __init__(self, area_type, size, position_x, position_y):
+    def __init__(self, area_type, size, position_x, position_y, image):
         self.area_type = area_type
         self.size = size
         self.position = Vector2(position_x, position_y)
-        self.velocity = Vector2(0, 0)   # stopped by default
+        self.velocity = Vector2(0, 0)
         self.direction = Vector2(0, 0)
-        self.wish_direction = Vector2(0,0)
+        self.image = image
+        self.rotation = 0
+
 
 
 
 class players(collisionbox):
-    def __init__(self, area_type,  size, position_x, position_y, speed, max_range):
-        super().__init__(area_type, size, position_x, position_y)
+    def __init__(self, area_type,  size, position_x, position_y, image, speed, max_range, turnspeed):
+        super().__init__(area_type, size, position_x, position_y, image)
         self.boost_speed = speed
         self.is_grappling = False
         self.max_grapple_range = max_range
-        self.image = pygame.image.load("img/player.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (self.size, self.size))
+        self.turnspeed = turnspeed
+
+    def boost(self):
+        if w_pressed:
+            self.velocity.y -= self.boost_speed
+
+        if a_pressed:
+            self.velocity.x -= self.boost_speed
+
+        if  s_pressed:
+            self.velocity.y += self.boost_speed
+
+        if d_pressed:
+            self.velocity.x += self.boost_speed
+
 
 
 
@@ -36,3 +53,7 @@ m1_pressed = False
 m2_pressed = False
 
 #other variables
+grapple_position = Vector2(400, 400)
+mouse_direction = Vector2()
+
+last_viewing_angle = 0
