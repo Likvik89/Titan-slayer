@@ -4,13 +4,15 @@ from pygame.math import *
 
 class collisionbox():
     def __init__(self, area_type, size, position_x, position_y, image):
-        self.area_type = area_type
         self.size = size
         self.position = Vector2(position_x, position_y)
         self.velocity = Vector2(0, 0)
         self.direction = Vector2(0, 0)
         self.image = image
         self.rotation = 0
+        self.hitbox = 0
+        if area_type == "rect":
+            self.hitbox = pygame.Rect(self.position.x, self.position.y, self.size, self.size)
 
 
 
@@ -37,7 +39,9 @@ class players(collisionbox):
         if d_pressed:
             self.velocity.x += self.boost_speed
 
-
+class titan(collisionbox):
+    def __init__(self, area_type, size, position_x, position_y, image):
+        super().__init__(area_type, size, position_x, position_y, image)
 
 
 #keys pressed
