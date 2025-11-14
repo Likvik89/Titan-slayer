@@ -7,14 +7,14 @@ import math
 
 pygame.init()
 
-screen = pygame.display.set_mode((1400 , 800), 0)
+screen = pygame.display.set_mode((1500 , 1000), 0)
 
 width, height = screen.get_size()
 
 
 
 player = players("rect", #areatype
-                 50, #size
+                 40, #size
                  200, #start position_x
                  300, #start position_y
                  pygame.image.load("img/player.png").convert_alpha(), #image
@@ -24,12 +24,6 @@ player = players("rect", #areatype
                  )
 
 
-pillar = collisionbox("rect",
-                      100,#size
-                      500, #start x
-                      500, #start y
-                      pygame.image.load("img/pillar_5.png").convert_alpha() #image
-                        )
 
 
 def inputs():
@@ -87,9 +81,6 @@ def inputs():
         elif event.type == pygame.MOUSEBUTTONUP:
             player.is_grappling = False
 
-def clamp(value, floor, celing):
-    return max(floor, min(celing, value))
-
 
 lastangle = 0
 def rotate():
@@ -124,18 +115,43 @@ def rotate():
             player.rotation = config.last_viewing_angle - player.turnspeed
             #print("left")
         """
-        player.rotation = -(config.mouse_direction).as_polar()[1] - 90
+    player.rotation = -(config.mouse_direction).as_polar()[1] - 90
          
-    else:
-        player.rotation = 0.0
 
+
+
+def collision():
+    body_index = player.hitbox.collidelist(config.terrain_hitbox)
+
+    if body_index != -1:
+
+        body = config.terrain[body_index]
+
+        player.collide(body)
+
+
+
+def generate_terrain():
+    global pillar
+
+    pillar = collisionbox("rect",
+                      300,#size
+                      500, #start x
+                      500, #start y
+                      pygame.image.load("img/pillar_5.png").convert_alpha() #image
+                        )
+    
+    config.terrain_hitbox.append(pillar.hitbox)
+    config.terrain.append(pillar)
+
+generate_terrain()
 
 time = 0
 
 clock = pygame.time.Clock()
 running = True
 while running:   
-    screen.fill((0, 0, 0))
+    screen.fill((222, 222, 222))
     time += 1
 
 
@@ -146,8 +162,8 @@ while running:
     if player.velocity.length() != 0:
         player.direction = player.velocity.normalize()
     
-    
-    inputs()    
+
+    inputs()
     
 
     string_color = (0, 255, 0) #grøn
@@ -177,22 +193,39 @@ while running:
         velocity = velocity * player.velocity.length() * sinv
         player.velocity = velocity
 
-
+    collision()
     player.boost()
+    
     player.position += player.velocity
+    player.hitbox.x = player.position.x
+    player.hitbox.y = player.position.y
+    #player.hitbox.center = player.position
+
+    
 
     if player.is_grappling:
         pygame.draw.line(screen, string_color, (player.position.x + player.size/2, player.position.y + player.size/2), config.grapple_position, 1)
-    if player.velocity != [0,0]:
-        pygame.draw.line(screen, (0, 0, 255), (player.position.x + player.size/2, player.position.y + player.size/2), (Vector2(player.position.x + player.size/2, player.position.y + player.size/2) + player.velocity*20 ), 1)
+    #if player.velocity != [0,0]:
+     #   pygame.draw.line(screen, (0, 0, 255), (player.position.x + player.size/2, player.position.y + player.size/2), (Vector2(player.position.x + player.size/2, player.position.y + player.size/2) + player.velocity*20 ), 1)
     
     rotate()
+    """
+    print()
+    print(player.hitbox.x)
+    print(player.position.x)
+    print()
+    print(player.hitbox.y)
+    print(player.position.y)
+    print()
+    """
     rotated = pygame.transform.rotate(player.image, player.rotation)
     rot_rect = rotated.get_rect(center=(player.position.x + player.size/2, player.position.y + player.size/2))
     screen.blit(rotated, rot_rect.topleft)
-    screen.blit(pillar.image, pillar.position)
+    
 
-    pygame.draw.circle(screen, (255, 255, 255), player.position, player.max_grapple_range, 1)
+    pygame.draw.circle(screen, (255, 0, 255), player.position, player.max_grapple_range, 1)
+    pygame.draw.rect(screen, (0, 0, 0), pillar.hitbox, width=0)
+    #screen.blit(pillar.image, (pillar.position.x - pillar.size/2 , pillar.position.y - pillar.size/2))
 
     config.last_viewing_angle = player.rotation
 
