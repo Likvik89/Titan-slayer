@@ -15,34 +15,33 @@ class collisionbox():
         if area_type == "rect":
             self.hitbox = pygame.Rect((position_x, position_y), (self.size, self.size))
         
-        if area_type == "circle":
-            self.hitbox = pygame
-        
         self.position = Vector2(self.hitbox.x, self.hitbox.y)
-        #self.hitbox.x = self.position.x - self.size/2
-        #self.hitbox.y = self.position.y = self.size/2
 
     def collide(self, body):
-        self_center = Vector2(self.hitbox.x + self.size/2, self.hitbox.y + self.size/2)
-        body_center = Vector2(body.hitbox.x + body.size/2, body.hitbox.y + body.size/2)
+        self_center = Vector2(self.position.x + self.size/2, self.position.y + self.size/2)
+        body_center = Vector2(body.position.x + body.size/2, body.position.y + body.size/2)
         retning = self_center - body_center
         vinkel = list(retning.as_polar())[1]
 
         if vinkel > -45 and vinkel < 45: #body er til venstre for self
             self.velocity.x = 0
-            self.position.x = body.position.x + body.size
+            self.velocity *= 0.8 #friktion
+            self.position.x = body.position.x + body.size #skubber self væk
 
         if vinkel < -135 or vinkel > 135: #body er til højre for self
             self.velocity.x = 0
-            self.position.x = body.position.x - self.size
+            self.velocity *= 0.8 #friktion
+            self.position.x = body.position.x - self.size #skubber self væk
         
         if vinkel > 45 and vinkel < 135: #body er over self
             self.velocity.y = 0
-            self.position.y = body.position.y + body.size
+            self.velocity *= 0.8 #friktion
+            self.position.y = body.position.y + body.size #skubber self væk
 
         if vinkel < -45 and vinkel > -135: #body er under self
             self.velocity.y = 0
-            self.position.y = body.position.y - self.size
+            self.velocity *= 0.8 #friktion
+            self.position.y = body.position.y - self.size #skubber self væk
             
         
         
@@ -57,6 +56,7 @@ class players(collisionbox):
         self.max_grapple_range = max_range
         self.image = pygame.transform.scale(self.image, (self.size, self.size))
         self.turnspeed = turnspeed
+        self.grapple_position = Vector2(400, 400)
 
     def boost(self):
         if w_pressed:
@@ -70,6 +70,16 @@ class players(collisionbox):
 
         if d_pressed:
             self.velocity.x += self.boost_speed
+
+    def grapple_point(self, mouse_position, terrain):
+
+        
+
+        if Vector2(mouse_position - self.position).length() > self.max_grapple_range:
+            self.grapple_position = (mouse_direction.normalize() * self.max_grapple_range) + self.position
+            
+        else:
+            self.grapple_position = mouse_position
 
 
 class titan(collisionbox):
@@ -97,7 +107,6 @@ m1_pressed = False
 m2_pressed = False
 
 #other variables
-grapple_position = Vector2(400, 400)
 mouse_direction = Vector2()
 
 last_viewing_angle = 0

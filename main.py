@@ -24,8 +24,6 @@ player = players("rect", #areatype
                  )
 
 
-
-
 def inputs():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -51,11 +49,7 @@ def inputs():
                 config.d_pressed = True
             
             if event.key == pygame.K_SPACE:
-                if Vector2(config.mouse_pos - player.position).length() > player.max_grapple_range:
-                    config.grapple_position = (config.mouse_direction.normalize() * player.max_grapple_range) + player.position
-            
-                else:
-                    config.grapple_position = config.mouse_pos
+                player.grapple_point(config.mouse_pos, terrain_hitbox)
 
                 player.is_grappling = True
 
@@ -75,12 +69,7 @@ def inputs():
             
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if Vector2(config.mouse_pos - player.position).length() > player.max_grapple_range:
-                config.grapple_position = (config.mouse_direction.normalize() * player.max_grapple_range) + player.position
-            
-            else:
-                config.grapple_position = config.mouse_pos
-
+            player.grapple_point(config.mouse_pos, terrain_hitbox)
             player.is_grappling = True
         
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -127,7 +116,7 @@ while running:
     time += 1
 
 
-    grapple_vector = config.grapple_position - player.position
+    grapple_vector = player.grapple_position - player.position
     config.mouse_pos = Vector2(pygame.mouse.get_pos())
     config.mouse_direction = Vector2(config.mouse_pos - player.position).normalize()
     
@@ -140,7 +129,7 @@ while running:
 
     string_color = (0, 255, 0) #grøn
 
-    if (player.position.distance_to(config.grapple_position) > player.max_grapple_range) and player.is_grappling and player.velocity != [0,0]:
+    if (player.position.distance_to(player.grapple_position) > player.max_grapple_range) and player.is_grappling and player.velocity != [0,0]:
 
         string_color = (255, 0, 0) #rød
 
@@ -157,10 +146,11 @@ while running:
         sinv = math.sin(math.acos(cosv))
 
         if grapple.y > 0:
-            velocity = -Vector2(-grapple_vector.y, grapple_vector.x).normalize()
+            velocity = -Vector2(-grapple_vector.y, grapple_vector.x).normalize() #sætter hastigheden vinkelret på snoren
             
         if grapple.y < 0:
-            velocity = Vector2(-grapple_vector.y, grapple_vector.x).normalize()
+            velocity = Vector2(-grapple_vector.y, grapple_vector.x).normalize() #sætter hastigheden vinkelret på snoren
+
         
         velocity = velocity * player.velocity.length() * sinv
         player.velocity = velocity
@@ -172,12 +162,11 @@ while running:
     player.position += player.velocity
     player.hitbox.x = player.position.x
     player.hitbox.y = player.position.y
-    #player.hitbox.center = player.position
 
     
 
     if player.is_grappling:
-        pygame.draw.line(screen, string_color, (player.position.x + player.size/2, player.position.y + player.size/2), config.grapple_position, 1)
+        pygame.draw.line(screen, string_color, (player.position.x + player.size/2, player.position.y + player.size/2), player.grapple_position, 1)
     #if player.velocity != [0,0]:
      #   pygame.draw.line(screen, (0, 0, 255), (player.position.x + player.size/2, player.position.y + player.size/2), (Vector2(player.position.x + player.size/2, player.position.y + player.size/2) + player.velocity*20 ), 1)
     
@@ -185,12 +174,13 @@ while running:
     
     rotated = pygame.transform.rotate(player.image, player.rotation)
     rot_rect = rotated.get_rect(center=(player.position.x + player.size/2, player.position.y + player.size/2))
+    pygame.draw.rect(screen, (0, 255, 0), player.hitbox)
+    
     screen.blit(rotated, rot_rect.topleft)
-    #pygame.draw.rect(screen, (0, 255, 0), player.hitbox)
     
 
     pygame.draw.circle(screen, (255, 0, 255), player.position, player.max_grapple_range, 1)
-    #pygame.draw.rect(screen, (0, 0, 0), pillar.hitbox, width=0)
+    pygame.draw.rect(screen, (0, 0, 0), pillar.hitbox, width=0)
     screen.blit(pillar.image, (pillar.position.x , pillar.position.y))
 
     config.last_viewing_angle = player.rotation
