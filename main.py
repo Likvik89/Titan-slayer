@@ -51,7 +51,12 @@ def inputs():
                 config.d_pressed = True
             
             if event.key == pygame.K_SPACE:
-                config.grapple_position = config.mouse_pos
+                if Vector2(config.mouse_pos - player.position).length() > player.max_grapple_range:
+                    config.grapple_position = (config.mouse_direction.normalize() * player.max_grapple_range) + player.position
+            
+                else:
+                    config.grapple_position = config.mouse_pos
+
                 player.is_grappling = True
 
 
@@ -84,40 +89,7 @@ def inputs():
 
 lastangle = 0
 def rotate():
-    if player.velocity.length_squared() > 1e-8:
-
-        """
-        leng = grapple_vector.length()
-        lenmd = (config.mouse_direction).length()
-        dp = grapple_vector.dot(config.mouse_direction)
-        cosv = dp/(lenmd*leng)
-        cosv = max(-1.0, min(1.0, cosv))
-        angle = math.acos(cosv)
-        angle = math.degrees(player.rotation)
-        
-
-        if player.is_grappling:
-
-            if angle > 90:
-                player.rotation = grapple_vector.as_polar()[1] +90
-            
-            if angle < -90:
-                player.rotation = grapple_vector.as_polar()[1] -90
-
-        
-        #print("current angle: ", player.rotation)
-        #print("last angle: ", config.last_viewing_angle)
-        if player.rotation - config.last_viewing_angle > player.turnspeed and False:
-            player.rotation = config.last_viewing_angle + player.turnspeed
-            #print("right")
-
-        if player.rotation - config.last_viewing_angle < -player.turnspeed and False:
-            player.rotation = config.last_viewing_angle - player.turnspeed
-            #print("left")
-        """
-    player.rotation = -(config.mouse_direction).as_polar()[1] - 90
-         
-
+    player.rotation = -(config.mouse_direction).as_polar()[1] - 90         
 
 
 def collision():
@@ -193,9 +165,10 @@ while running:
         velocity = velocity * player.velocity.length() * sinv
         player.velocity = velocity
 
-    collision()
-    player.boost()
     
+    player.boost()
+    collision()
+
     player.position += player.velocity
     player.hitbox.x = player.position.x
     player.hitbox.y = player.position.y
@@ -209,18 +182,22 @@ while running:
      #   pygame.draw.line(screen, (0, 0, 255), (player.position.x + player.size/2, player.position.y + player.size/2), (Vector2(player.position.x + player.size/2, player.position.y + player.size/2) + player.velocity*20 ), 1)
     
     rotate()
+    
     """
     print()
     print(player.hitbox.x)
+    print(player.hitbox.centerx)
     print(player.position.x)
     print()
     print(player.hitbox.y)
+    print(player.hitbox.centery)
     print(player.position.y)
     print()
     """
     rotated = pygame.transform.rotate(player.image, player.rotation)
     rot_rect = rotated.get_rect(center=(player.position.x + player.size/2, player.position.y + player.size/2))
     screen.blit(rotated, rot_rect.topleft)
+    pygame.draw.rect(screen, (0, 255, 0), player.hitbox)
     
 
     pygame.draw.circle(screen, (255, 0, 255), player.position, player.max_grapple_range, 1)

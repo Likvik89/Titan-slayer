@@ -19,49 +19,35 @@ class collisionbox():
             self.hitbox = pygame
         
         self.position = Vector2(self.hitbox.x, self.hitbox.y)
-        self.hitbox.x = self.position.x - self.size/2
-        self.hitbox.y = self.position.y = self.size/2
+        #self.hitbox.x = self.position.x - self.size/2
+        #self.hitbox.y = self.position.y = self.size/2
 
     def collide(self, body):
-        # AABB resolution: if hitboxes overlap, push `self` out along the smallest penetration axis.
-        if not hasattr(self, "hitbox") or not hasattr(body, "hitbox"):
-            return
-        if not self.hitbox.colliderect(body.hitbox):
-            return
+        self_center = Vector2(self.hitbox.x + self.size/2, self.hitbox.y + self.size/2)
+        body_center = Vector2(body.hitbox.x + body.size/2, body.hitbox.y + body.size/2)
+        retning = self_center - body_center
+        vinkel = list(retning.as_polar())[1]
+        print(vinkel)
 
-        # centers and delta
-        self_c = Vector2(self.hitbox.center)
-        body_c = Vector2(body.hitbox.center)
-        delta = self_c - body_c
-
-        # half extents
-        half_w = (self.hitbox.width + body.hitbox.width) * 0.5
-        half_h = (self.hitbox.height + body.hitbox.height) * 0.5
-
-        overlap_x = half_w - abs(delta.x)
-        overlap_y = half_h - abs(delta.y)
-
-        if overlap_x <= 0 or overlap_y <= 0:
-            return
-
-        # resolve along smallest overlap (prevents corner-sticking)
-        if overlap_x < overlap_y:
-            # resolve horizontally
-            if delta.x > 0:
-                self.position.x += overlap_x
-            else:
-                self.position.x -= overlap_x
+        if vinkel > -45 and vinkel < 45: #body er til venstre for self
             self.velocity.x = 0
-        else:
-            # resolve vertically
-            if delta.y > 0:
-                self.position.y += overlap_y
-            else:
-                self.position.y -= overlap_y
-            self.velocity.y = 0
+            self.position.x = body.position.x + body.size
 
-        # keep hitbox synced with logical position
-        self.hitbox.center = (int(self.position.x), int(self.position.y))
+        if vinkel < -135 or vinkel > 135: #body er til højre for self
+            self.velocity.x = 0
+            self.position.x = body.position.x - self.size
+        
+        if vinkel > 45 and vinkel < 135: #body er over self
+            self.velocity.y = 0
+            self.position.y = body.position.y + body.size
+
+        if vinkel < -45 and vinkel > -135: #body er under self
+            self.velocity.y = 0
+            self.position.y = body.position.y - self.size
+            
+        
+        
+
 
 
 class players(collisionbox):
