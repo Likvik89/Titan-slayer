@@ -27,7 +27,6 @@ class collisionbox():
         body_center = Vector2(body.hitbox.x + body.size/2, body.hitbox.y + body.size/2)
         retning = self_center - body_center
         vinkel = list(retning.as_polar())[1]
-        print(vinkel)
 
         if vinkel > -45 and vinkel < 45: #body er til venstre for self
             self.velocity.x = 0

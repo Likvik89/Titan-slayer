@@ -183,26 +183,15 @@ while running:
     
     rotate()
     
-    """
-    print()
-    print(player.hitbox.x)
-    print(player.hitbox.centerx)
-    print(player.position.x)
-    print()
-    print(player.hitbox.y)
-    print(player.hitbox.centery)
-    print(player.position.y)
-    print()
-    """
     rotated = pygame.transform.rotate(player.image, player.rotation)
     rot_rect = rotated.get_rect(center=(player.position.x + player.size/2, player.position.y + player.size/2))
     screen.blit(rotated, rot_rect.topleft)
-    pygame.draw.rect(screen, (0, 255, 0), player.hitbox)
+    #pygame.draw.rect(screen, (0, 255, 0), player.hitbox)
     
 
     pygame.draw.circle(screen, (255, 0, 255), player.position, player.max_grapple_range, 1)
-    pygame.draw.rect(screen, (0, 0, 0), pillar.hitbox, width=0)
-    #screen.blit(pillar.image, (pillar.position.x - pillar.size/2 , pillar.position.y - pillar.size/2))
+    #pygame.draw.rect(screen, (0, 0, 0), pillar.hitbox, width=0)
+    screen.blit(pillar.image, (pillar.position.x , pillar.position.y))
 
     config.last_viewing_angle = player.rotation
 
