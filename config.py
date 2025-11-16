@@ -71,15 +71,44 @@ class players(collisionbox):
         if d_pressed:
             self.velocity.x += self.boost_speed
 
-    def grapple_point(self, mouse_position, terrain):
+    def grapple_point(self, mouse_dir, mouse_position, terrain_):
 
-        
+        grapple_start = tuple(map(int, self.hitbox.center))
+        grapple_end = tuple(map(int, (mouse_dir * self.max_grapple_range) + self.position))
+        mouse_position = tuple(mouse_position)
 
-        if Vector2(mouse_position - self.position).length() > self.max_grapple_range:
-            self.grapple_position = (mouse_direction.normalize() * self.max_grapple_range) + self.position
+
+        for body in terrain_:
+            clipped_grapple_vector = body.clipline(grapple_start, grapple_end)
             
-        else:
-            self.grapple_position = mouse_position
+            if (not clipped_grapple_vector):
+                continue
+
+            print(body.collidepoint(grapple_end))
+            if not body.collidepoint(grapple_end):
+                self.is_grappling = False
+            
+            point1, point2 = clipped_grapple_vector
+            point1 = Vector2(point1)
+            point2 = Vector2(point2)
+
+            distance1 = (self.position - (point1)).length()
+            distance2 = (self.position - (point2)).length()
+
+            if distance1 < distance2:
+                self.grapple_position = point1 
+                print("start")
+
+            elif distance2 < distance1:
+                self.grapple_position = point2                     
+                print("end")
+
+            else:
+                self.is_grappling = False
+        
+        if (self.grapple_position - self.position).length() > self.max_grapple_range:
+            self.is_grappling = False
+ 
 
 
 class titan(collisionbox):

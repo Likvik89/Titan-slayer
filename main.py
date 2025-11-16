@@ -49,7 +49,7 @@ def inputs():
                 config.d_pressed = True
             
             if event.key == pygame.K_SPACE:
-                player.grapple_point(config.mouse_pos, terrain_hitbox)
+                player.grapple_point(config.mouse_direction, config.mouse_pos, terrain_hitbox)
 
                 player.is_grappling = True
 
@@ -69,7 +69,7 @@ def inputs():
             
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            player.grapple_point(config.mouse_pos, terrain_hitbox)
+            player.grapple_point(config.mouse_direction, config.mouse_pos, terrain_hitbox)
             player.is_grappling = True
         
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -130,6 +130,7 @@ while running:
     string_color = (0, 255, 0) #grøn
 
     if (player.position.distance_to(player.grapple_position) > player.max_grapple_range) and player.is_grappling and player.velocity != [0,0]:
+
 
         string_color = (255, 0, 0) #rød
 
