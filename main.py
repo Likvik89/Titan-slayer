@@ -51,8 +51,6 @@ def inputs():
             if event.key == pygame.K_SPACE:
                 player.grapple_point(config.mouse_direction, config.mouse_pos, terrain_hitbox)
 
-                player.is_grappling = True
-
 
             
         if event.type == pygame.KEYUP:
@@ -70,7 +68,6 @@ def inputs():
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             player.grapple_point(config.mouse_direction, config.mouse_pos, terrain_hitbox)
-            player.is_grappling = True
         
         elif event.type == pygame.MOUSEBUTTONUP:
             player.is_grappling = False

@@ -72,6 +72,7 @@ class players(collisionbox):
             self.velocity.x += self.boost_speed
 
     def grapple_point(self, mouse_dir, mouse_position, terrain_):
+        self.is_grappling = True
 
         grapple_start = tuple(map(int, self.hitbox.center))
         grapple_end = tuple(map(int, (mouse_dir * self.max_grapple_range) + self.position))
