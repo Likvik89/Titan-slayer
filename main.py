@@ -156,8 +156,6 @@ while running:
         velocity = velocity * player.velocity.length() * sinv
         player.velocity = velocity
 
-        #pygame.draw.line(screen, string_color, (player.position.x + player.size/2, player.position.y + player.size/2), Vector2(player.grapple_position - player.position) + player.position, 1)
-
     
     player.boost()
     collision()
