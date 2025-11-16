@@ -80,7 +80,7 @@ class players(collisionbox):
         grapple_end = tuple(map(int, (mouse_dir * self.max_grapple_range) + self.position))
 
         grapple_vector = Vector2(Vector2(grapple_end) - self.position)
-        self.grapple_range = grapple_vector.length() +10
+        #self.grapple_range = grapple_vector.length()
 
         global new_grapple_position
         new_grapple_position = False
@@ -95,9 +95,10 @@ class players(collisionbox):
             point = Vector2(point) #starten er altid tættest på
 
             self.grapple_position = point #grapple position sættes til kanten af terrænget
-            new_grapple_position = point
+            new_grapple_position = point 
+            self.grapple_range = (point - self.position).length() +10
         
-        #tjekker om der er fundet et nyt grapplepunkt
+        #tjekker om der er fundet et nyt validt grapplepunkt
         if not new_grapple_position:
             self.is_grappling = False
  
