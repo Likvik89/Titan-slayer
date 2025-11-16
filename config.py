@@ -43,8 +43,9 @@ class collisionbox():
             
 
 class attacks(collisionbox):
-    def __init__(self, size, position, animation, damage, range, start_time, damage_window, attacker, cooldown):
+    def __init__(self, size, position, screen, animation, damage, range, start_time, damage_window, attacker, cooldown):
         super().__init__(size, position)
+        self.screen = screen
         self.animation = animation
         self.damage = damage
         self.range = range
@@ -59,7 +60,7 @@ class attacks(collisionbox):
 
 
 class players(collisionbox):
-    def __init__(self,  size, position, image, friction, speed, max_range, turnspeed):
+    def __init__(self,  size, position, image, friction, speed, max_range, turnspeed, screen):
         super().__init__(size, position, image, friction)
         self.boost_speed = speed
         self.is_grappling = False
@@ -68,6 +69,8 @@ class players(collisionbox):
         self.image = pygame.transform.scale(self.image, (self.size, self.size))
         self.turnspeed = turnspeed
         self.grapple_position = Vector2(400, 400)
+        self.screen = screen
+        #self.slash = attacks()
 
     def boost(self):
         if w_pressed:

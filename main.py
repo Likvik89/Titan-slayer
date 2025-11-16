@@ -19,7 +19,8 @@ player = players(
                  0.5, #friction
                  1/8, #boost_speed
                  300, #max grapple range
-                 20 # turnspeed
+                 20, # turnspeed
+                 screen #screen
                  )
 
 
