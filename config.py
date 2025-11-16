@@ -3,8 +3,7 @@ from pygame.math import *
 
 
 class collisionbox():
-    def __init__(self, area_type, size, position_x, position_y, image, friction):
-        self.areatype = area_type
+    def __init__(self, size, position, image, friction):
         self.size = size
         self.friction = friction
         self.velocity = Vector2(0, 0)
@@ -13,9 +12,7 @@ class collisionbox():
         self.image = pygame.transform.scale(self.image, (size, size))
         self.rotation = 0
         self.hitbox = 0
-        if area_type == "rect":
-            self.hitbox = pygame.Rect((position_x, position_y), (self.size, self.size))
-        
+        self.hitbox = pygame.Rect(position, (self.size, self.size))    
         self.position = Vector2(self.hitbox.x, self.hitbox.y)
 
     def collide(self, body):
@@ -44,14 +41,26 @@ class collisionbox():
             self.velocity *= body.friction
             self.position.y = body.position.y - self.size #skubber self væk
             
-        
-        
 
+class attacks(collisionbox):
+    def __init__(self, size, position, animation, damage, range, start_time, damage_window, attacker, cooldown):
+        super().__init__(size, position)
+        self.animation = animation
+        self.damage = damage
+        self.range = range
+        self.start_up_time = start_time
+        self.damage_window = damage_window
+        self.attacker = attacker
+        self.cooldown = cooldown
+    
+    def attack(self):
+        pass
+   
 
 
 class players(collisionbox):
-    def __init__(self, area_type,  size, position_x, position_y, image, friction, speed, max_range, turnspeed):
-        super().__init__(area_type, size, position_x, position_y, image, friction)
+    def __init__(self,  size, position, image, friction, speed, max_range, turnspeed):
+        super().__init__(size, position, image, friction)
         self.boost_speed = speed
         self.is_grappling = False
         self.max_grapple_range = max_range
@@ -73,19 +82,16 @@ class players(collisionbox):
         if d_pressed:
             self.velocity.x += self.boost_speed
 
-    def grapple_point(self, mouse_dir, mouse_position, terrain_):
+    def grapple_point(self, mouse_dir, bodies):
         self.is_grappling = True
 
         grapple_start = tuple(map(int, self.hitbox.center))
         grapple_end = tuple(map(int, (mouse_dir * self.max_grapple_range) + self.position))
 
-        grapple_vector = Vector2(Vector2(grapple_end) - self.position)
-        #self.grapple_range = grapple_vector.length()
-
         global new_grapple_position
         new_grapple_position = False
         
-        for body in terrain_:
+        for body in bodies:
             clipped_grapple_vector = body.clipline(grapple_start, grapple_end) #den del af snoren der overlapper terrain
 
             if (not clipped_grapple_vector): #snoren overlapper ikke terrain
@@ -105,8 +111,9 @@ class players(collisionbox):
 
 
 class titan(collisionbox):
-    def __init__(self, area_type, size, position_x, position_y, image):
-        super().__init__(area_type, size, position_x, position_y, image)
+    def __init__(self, size, position, image):
+        super().__init__(size, position, image)
+
 
 
 def clamp(value, floor, celing):
@@ -122,16 +129,13 @@ s_pressed = False
 a_pressed = False
 d_pressed = False
 
-mouse_pos = 0
-mouse_x = 0
-mouse_y = 0
+
 m1_pressed = False
 m2_pressed = False
 
 #other variables
+mouse_pos = 0
 mouse_direction = Vector2()
-
-last_viewing_angle = 0
 
 terrain = []
 terrain_hitbox = []
