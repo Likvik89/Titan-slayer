@@ -18,6 +18,7 @@ player = players("rect", #areatype
                  200, #start position_x
                  300, #start position_y
                  pygame.image.load("img/player.png").convert_alpha(), #image
+                 0.5, #friction
                  1/8, #boost_speed
                  300, #max grapple range
                  20 # turnspeed
@@ -68,7 +69,8 @@ def inputs():
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             player.grapple_point(config.mouse_direction, config.mouse_pos, terrain_hitbox)
-        
+
+
         elif event.type == pygame.MOUSEBUTTONUP:
             player.is_grappling = False
 
@@ -96,7 +98,8 @@ def generate_terrain():
                       300,#size
                       500, #start x
                       500, #start y
-                      pygame.image.load("img/pillar_5.png").convert_alpha() #image
+                      pygame.image.load("img/pillar_5.png").convert_alpha(), #image
+                      0.5 #friction
                         )
     
     config.terrain_hitbox.append(pillar.hitbox)
@@ -126,7 +129,7 @@ while running:
 
     string_color = (0, 255, 0) #grøn
 
-    if (player.position.distance_to(player.grapple_position) > player.max_grapple_range) and player.is_grappling and player.velocity != [0,0]:
+    if (player.position.distance_to(player.grapple_position) > player.grapple_range) and player.is_grappling and player.velocity != [0,0]:
 
 
         string_color = (255, 0, 0) #rød
@@ -152,6 +155,8 @@ while running:
         
         velocity = velocity * player.velocity.length() * sinv
         player.velocity = velocity
+
+        #pygame.draw.line(screen, string_color, (player.position.x + player.size/2, player.position.y + player.size/2), Vector2(player.grapple_position - player.position) + player.position, 1)
 
     
     player.boost()

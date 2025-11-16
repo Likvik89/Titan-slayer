@@ -3,9 +3,10 @@ from pygame.math import *
 
 
 class collisionbox():
-    def __init__(self, area_type, size, position_x, position_y, image):
+    def __init__(self, area_type, size, position_x, position_y, image, friction):
         self.areatype = area_type
         self.size = size
+        self.friction = friction
         self.velocity = Vector2(0, 0)
         self.direction = Vector2(0, 0)
         self.image = image
@@ -25,22 +26,22 @@ class collisionbox():
 
         if vinkel > -45 and vinkel < 45: #body er til venstre for self
             self.velocity.x = 0
-            self.velocity *= 0.8 #friktion
+            self.velocity *= body.friction
             self.position.x = body.position.x + body.size #skubber self væk
 
         if vinkel < -135 or vinkel > 135: #body er til højre for self
             self.velocity.x = 0
-            self.velocity *= 0.8 #friktion
+            self.velocity *= body.friction
             self.position.x = body.position.x - self.size #skubber self væk
         
         if vinkel > 45 and vinkel < 135: #body er over self
             self.velocity.y = 0
-            self.velocity *= 0.8 #friktion
+            self.velocity *= body.friction
             self.position.y = body.position.y + body.size #skubber self væk
 
         if vinkel < -45 and vinkel > -135: #body er under self
             self.velocity.y = 0
-            self.velocity *= 0.8 #friktion
+            self.velocity *= body.friction
             self.position.y = body.position.y - self.size #skubber self væk
             
         
@@ -49,11 +50,12 @@ class collisionbox():
 
 
 class players(collisionbox):
-    def __init__(self, area_type,  size, position_x, position_y, image, speed, max_range, turnspeed):
-        super().__init__(area_type, size, position_x, position_y, image)
+    def __init__(self, area_type,  size, position_x, position_y, image, friction, speed, max_range, turnspeed):
+        super().__init__(area_type, size, position_x, position_y, image, friction)
         self.boost_speed = speed
         self.is_grappling = False
         self.max_grapple_range = max_range
+        self.grapple_range = 0
         self.image = pygame.transform.scale(self.image, (self.size, self.size))
         self.turnspeed = turnspeed
         self.grapple_position = Vector2(400, 400)
@@ -76,38 +78,27 @@ class players(collisionbox):
 
         grapple_start = tuple(map(int, self.hitbox.center))
         grapple_end = tuple(map(int, (mouse_dir * self.max_grapple_range) + self.position))
-        mouse_position = tuple(mouse_position)
 
+        grapple_vector = Vector2(Vector2(grapple_end) - self.position)
+        self.grapple_range = grapple_vector.length() +10
 
+        global new_grapple_position
+        new_grapple_position = False
+        
         for body in terrain_:
-            clipped_grapple_vector = body.clipline(grapple_start, grapple_end)
-            
-            if (not clipped_grapple_vector):
+            clipped_grapple_vector = body.clipline(grapple_start, grapple_end) #den del af snoren der overlapper terrain
+
+            if (not clipped_grapple_vector): #snoren overlapper ikke terrain
                 continue
 
-            print(body.collidepoint(grapple_end))
-            if not body.collidepoint(grapple_end):
-                self.is_grappling = False
-            
-            point1, point2 = clipped_grapple_vector
-            point1 = Vector2(point1)
-            point2 = Vector2(point2)
+            point, point2 = clipped_grapple_vector #start og slut af den klippede vector
+            point = Vector2(point) #starten er altid tættest på
 
-            distance1 = (self.position - (point1)).length()
-            distance2 = (self.position - (point2)).length()
-
-            if distance1 < distance2:
-                self.grapple_position = point1 
-                print("start")
-
-            elif distance2 < distance1:
-                self.grapple_position = point2                     
-                print("end")
-
-            else:
-                self.is_grappling = False
+            self.grapple_position = point #grapple position sættes til kanten af terrænget
+            new_grapple_position = point
         
-        if (self.grapple_position - self.position).length() > self.max_grapple_range:
+        #tjekker om der er fundet et nyt grapplepunkt
+        if not new_grapple_position:
             self.is_grappling = False
  
 
