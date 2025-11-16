@@ -12,11 +12,9 @@ screen = pygame.display.set_mode((1500 , 1000), 0)
 width, height = screen.get_size()
 
 
-
-player = players("rect", #areatype
+player = players(
                  40, #size
-                 200, #start position_x
-                 300, #start position_y
+                 (200, 300), #start position
                  pygame.image.load("img/player.png").convert_alpha(), #image
                  0.5, #friction
                  1/8, #boost_speed
@@ -50,7 +48,7 @@ def inputs():
                 config.d_pressed = True
             
             if event.key == pygame.K_SPACE:
-                player.grapple_point(config.mouse_direction, config.mouse_pos, terrain_hitbox)
+                player.grapple_point(config.mouse_direction, terrain_hitbox)
 
 
             
@@ -68,17 +66,12 @@ def inputs():
             
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            player.grapple_point(config.mouse_direction, config.mouse_pos, terrain_hitbox)
+            player.grapple_point(config.mouse_direction, terrain_hitbox)
 
 
         elif event.type == pygame.MOUSEBUTTONUP:
             player.is_grappling = False
-
-
-lastangle = 0
-def rotate():
-    player.rotation = -(config.mouse_direction).as_polar()[1] - 90         
-
+           
 
 def collision():
     body_index = player.hitbox.collidelist(config.terrain_hitbox)
@@ -90,16 +83,15 @@ def collision():
         player.collide(body)
 
 
-
 def generate_terrain():
     global pillar
 
-    pillar = collisionbox("rect",
-                      300,#size
-                      500, #start x
-                      500, #start y
-                      pygame.image.load("img/pillar_5.png").convert_alpha(), #image
-                      0.5 #friction
+
+    pillar = collisionbox(
+                          200,#size
+                          (500, 500), #position
+                          pygame.image.load("img/pillar_5.png").convert_alpha(), #image
+                          0.5 #friction
                         )
     
     config.terrain_hitbox.append(pillar.hitbox)
@@ -165,26 +157,20 @@ while running:
     player.hitbox.y = player.position.y
 
     
-
-    if player.is_grappling:
-        pygame.draw.line(screen, string_color, (player.position.x + player.size/2, player.position.y + player.size/2), player.grapple_position, 1)
-    #if player.velocity != [0,0]:
-     #   pygame.draw.line(screen, (0, 0, 255), (player.position.x + player.size/2, player.position.y + player.size/2), (Vector2(player.position.x + player.size/2, player.position.y + player.size/2) + player.velocity*20 ), 1)
-    
-    rotate()
-    
+    #roterer spilleren
+    player.rotation = -(config.mouse_direction).as_polar()[1] - 90  
     rotated = pygame.transform.rotate(player.image, player.rotation)
     rot_rect = rotated.get_rect(center=(player.position.x + player.size/2, player.position.y + player.size/2))
     pygame.draw.rect(screen, (0, 255, 0), player.hitbox)
-    
     screen.blit(rotated, rot_rect.topleft)
     
-
+    if player.is_grappling:
+        pygame.draw.line(screen, string_color, (player.position.x + player.size/2, player.position.y + player.size/2), player.grapple_position, 1)
+    
     pygame.draw.circle(screen, (255, 0, 255), player.position, player.max_grapple_range, 1)
     pygame.draw.rect(screen, (0, 0, 0), pillar.hitbox, width=0)
     screen.blit(pillar.image, (pillar.position.x , pillar.position.y))
 
-    config.last_viewing_angle = player.rotation
 
     if time >= 10:
         time = 0
