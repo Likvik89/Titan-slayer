@@ -7,9 +7,8 @@ import math
 
 pygame.init()
 
-screen = pygame.display.set_mode((1500 , 1000), 0)
 
-width, height = screen.get_size()
+width, height = config.screen.get_size()
 
 
 player = players(
@@ -20,7 +19,7 @@ player = players(
                  1/8, #boost_speed
                  300, #max grapple range
                  20, # turnspeed
-                 screen #screen
+                 config.screen #screen
                  )
 
 
@@ -100,12 +99,32 @@ def generate_terrain():
 
 generate_terrain()
 
+def animate():
+
+    
+
+    draw(player.image, player.size, player.position, player.rotation)
+ 
+    if player.is_grappling:
+        pygame.draw.line(config.screen, string_color, (player.position.x + player.size/2, player.position.y + player.size/2), player.grapple_position, 1)
+    
+    pygame.draw.circle(config.screen, (255, 0, 255), player.position, player.max_grapple_range, 1)
+    pygame.draw.rect(config.screen, (0, 0, 0), pillar.hitbox, width=0)
+    config.screen.blit(pillar.image, (pillar.position.x , pillar.position.y))
+
+
+def draw(image, size, position, rotation):
+    rotated = pygame.transform.rotate(image, rotation)
+    rot_rect = rotated.get_rect(center=(position.x + size/2, position.y + size/2))
+    config.screen.blit(rotated, rot_rect.topleft)
+
+
 time = 0
 
 clock = pygame.time.Clock()
 running = True
 while running:   
-    screen.fill((222, 222, 222))
+    config.screen.fill((222, 222, 222))
     time += 1
 
 
@@ -122,7 +141,7 @@ while running:
 
     string_color = (0, 255, 0) #grøn
 
-    if (player.position.distance_to(player.grapple_position) > player.grapple_range) and player.is_grappling and player.velocity != [0,0]:
+    if (player.position.distance_to(player.grapple_position) > player.grapple_range) and player.is_grappling and player.velocity != [0,0]: #spiller grappler og er længere væk end grapple_range
 
 
         string_color = (255, 0, 0) #rød
@@ -156,21 +175,10 @@ while running:
     player.position += player.velocity
     player.hitbox.x = player.position.x
     player.hitbox.y = player.position.y
+    player.rotation = -(config.mouse_direction).as_polar()[1] - 90  
 
     
-    #roterer spilleren
-    player.rotation = -(config.mouse_direction).as_polar()[1] - 90  
-    rotated = pygame.transform.rotate(player.image, player.rotation)
-    rot_rect = rotated.get_rect(center=(player.position.x + player.size/2, player.position.y + player.size/2))
-    pygame.draw.rect(screen, (0, 255, 0), player.hitbox)
-    screen.blit(rotated, rot_rect.topleft)
-    
-    if player.is_grappling:
-        pygame.draw.line(screen, string_color, (player.position.x + player.size/2, player.position.y + player.size/2), player.grapple_position, 1)
-    
-    pygame.draw.circle(screen, (255, 0, 255), player.position, player.max_grapple_range, 1)
-    pygame.draw.rect(screen, (0, 0, 0), pillar.hitbox, width=0)
-    screen.blit(pillar.image, (pillar.position.x , pillar.position.y))
+    animate()
 
 
     if time >= 10:

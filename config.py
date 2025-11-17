@@ -2,6 +2,38 @@ import pygame
 from pygame.math import *
 
 
+#keys pressed
+w_pressed = False
+s_pressed = False
+a_pressed = False
+d_pressed = False
+
+m1_pressed = False
+m2_pressed = False
+
+#other variables
+
+screen = pygame.display.set_mode((1500 , 1000), 0)
+
+
+mouse_pos = 0
+mouse_direction = Vector2()
+
+terrain = []
+terrain_hitbox = []
+
+sprites = []
+animations = []
+
+
+def clamp(value, floor, celing):
+    return max(floor, min(celing, value))
+
+def angle_between():
+    pass
+
+
+
 class collisionbox():
     def __init__(self, size, position, image, friction):
         self.size = size
@@ -42,21 +74,30 @@ class collisionbox():
             self.position.y = body.position.y - self.size #skubber self væk
             
 
-class attacks(collisionbox):
-    def __init__(self, size, position, screen, animation, damage, range, start_time, damage_window, attacker, cooldown):
-        super().__init__(size, position)
-        self.screen = screen
-        self.animation = animation
-        self.damage = damage
-        self.range = range
-        self.start_up_time = start_time
-        self.damage_window = damage_window
-        self.attacker = attacker
-        self.cooldown = cooldown
-    
-    def attack(self):
-        pass
-   
+class animation():
+    def __init__(self, animation, frame_size, frames):
+        self.frame_size = frame_size
+        self.position = Vector2(0,0)
+        self.rotation = 0
+
+        self.current_frame = 0
+        self.frame_number = frames
+        self.is_playing = False
+
+        self.animation = []
+        for i in range(frames):
+            frame_rect = pygame.Rect(0, frame_size * i, frame_size, frame_size)
+            frame = animation.subsurface(frame_rect).copy()
+            self.animation.append(frame)
+        
+    def play(self, position, rotation):
+        self.position = position
+        self.rotation = rotation
+        self.is_playing = True
+        animations.append(self)
+
+
+
 
 
 class players(collisionbox):
@@ -70,6 +111,7 @@ class players(collisionbox):
         self.turnspeed = turnspeed
         self.grapple_position = Vector2(400, 400)
         self.screen = screen
+        self.is_attacking = False
         #self.slash = attacks()
 
     def boost(self):
@@ -88,13 +130,13 @@ class players(collisionbox):
     def grapple_point(self, mouse_dir, bodies):
         self.is_grappling = True
 
-        grapple_start = tuple(map(int, self.hitbox.center))
-        grapple_end = tuple(map(int, (mouse_dir * self.max_grapple_range) + self.position))
+        grapple_start = tuple(self.hitbox.center)
+        grapple_end = tuple((mouse_dir * self.max_grapple_range) + self.position)
 
         global new_grapple_position
         new_grapple_position = False
-        
-        for body in bodies:
+
+        for body in terrain_hitbox:
             clipped_grapple_vector = body.clipline(grapple_start, grapple_end) #den del af snoren der overlapper terrain
 
             if (not clipped_grapple_vector): #snoren overlapper ikke terrain
@@ -119,26 +161,3 @@ class titan(collisionbox):
 
 
 
-def clamp(value, floor, celing):
-    return max(floor, min(celing, value))
-
-def angle_between():
-    pass
-
-
-#keys pressed
-w_pressed = False
-s_pressed = False
-a_pressed = False
-d_pressed = False
-
-
-m1_pressed = False
-m2_pressed = False
-
-#other variables
-mouse_pos = 0
-mouse_direction = Vector2()
-
-terrain = []
-terrain_hitbox = []
