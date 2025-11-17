@@ -101,10 +101,17 @@ generate_terrain()
 
 def animate():
 
+    for animation in config.animations:
+        draw(animation.animation[animation.current_frame], animation.frame_size, animation.position, animation.rotation)
+        animation.current_frame += 1
+        if animation.current_frame >= animation.frame_number:
+            animation.is_playing = False
+            animation.current_frame = 0
+            config.animations.remove(animation)
+        
+
     for image in config.sprites:
-        draw(image.image, image.size, image.position, image.rotation)
- 
-    
+        draw(image.image, image.size, image.position, image.rotation)    
 
     #grappling hook
     if player.is_grappling:
@@ -124,7 +131,7 @@ time = 0
 clock = pygame.time.Clock()
 running = True
 while running:   
-    config.screen.fill((222, 222, 222))
+    config.screen.fill((0, 0, 0))
     time += 1
 
 

@@ -95,9 +95,8 @@ class animation():
         self.position = position
         self.rotation = rotation
         self.is_playing = True
-        animations.append(self)
-
-
+        if not self in animations:
+            animations.append(self)
 
 
 
@@ -105,6 +104,7 @@ class players(collisionbox):
     def __init__(self,  size, position, image, friction, speed, max_range, turnspeed, screen):
         super().__init__(size, position, image, friction)
         self.boost_speed = speed
+        self.is_boosting = False
         self.is_grappling = False
         self.max_grapple_range = max_range
         self.grapple_range = 0
@@ -113,20 +113,31 @@ class players(collisionbox):
         self.grapple_position = Vector2(400, 400)
         self.screen = screen
         self.is_attacking = False
+        self.boost_anim = animation(pygame.image.load("animation/ODM_boste.png").convert_alpha(), #spritesheet
+                                    16, #frame size
+                                    8 #number of frames
+                                    )
         #self.slash = attacks()
 
     def boost(self):
         if w_pressed:
+            self.is_boosting = True
             self.velocity.y -= self.boost_speed
 
         if a_pressed:
+            self.is_boosting = True
             self.velocity.x -= self.boost_speed
 
         if  s_pressed:
+            self.is_boosting = True
             self.velocity.y += self.boost_speed
 
         if d_pressed:
+            self.is_boosting = True
             self.velocity.x += self.boost_speed
+        
+        if self.is_boosting:
+            self.boost_anim.play(Vector2(self.position.x, self.position.y + self.size), self.rotation)
 
     def grapple_point(self, mouse_dir, bodies):
         self.is_grappling = True
