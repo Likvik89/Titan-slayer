@@ -101,16 +101,16 @@ generate_terrain()
 
 def animate():
 
+    for image in config.sprites:
+        draw(image.image, image.size, image.position, image.rotation)
+ 
     
 
-    draw(player.image, player.size, player.position, player.rotation)
- 
+    #grappling hook
     if player.is_grappling:
-        pygame.draw.line(config.screen, string_color, (player.position.x + player.size/2, player.position.y + player.size/2), player.grapple_position, 1)
-    
+        pygame.draw.line(config.screen, string_color, (player.position.x + player.size/2, player.position.y + player.size/2), player.grapple_position, 1)    
     pygame.draw.circle(config.screen, (255, 0, 255), player.position, player.max_grapple_range, 1)
-    pygame.draw.rect(config.screen, (0, 0, 0), pillar.hitbox, width=0)
-    config.screen.blit(pillar.image, (pillar.position.x , pillar.position.y))
+
 
 
 def draw(image, size, position, rotation):

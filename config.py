@@ -46,6 +46,7 @@ class collisionbox():
         self.hitbox = 0
         self.hitbox = pygame.Rect(position, (self.size, self.size))    
         self.position = Vector2(self.hitbox.x, self.hitbox.y)
+        sprites.append(self)
 
     def collide(self, body):
         self_center = Vector2(self.position.x + self.size/2, self.position.y + self.size/2)
