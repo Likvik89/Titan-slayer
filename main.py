@@ -10,6 +10,8 @@ pygame.init()
 
 width, height = config.screen.get_size()
 
+time = 0
+
 
 player = players(
                  40, #size
@@ -18,8 +20,10 @@ player = players(
                  0.5, #friction
                  1/8, #boost_speed
                  300, #max grapple range
-                 20, # turnspeed
-                 config.screen #screen
+                 config.screen,
+                 100, #maxfuel
+                 1, #fuel recharge
+                 1  #fuel consumption
                  )
 
 
@@ -103,12 +107,13 @@ def animate():
 
     for animation in config.animations:
         draw(animation.animation[animation.current_frame], animation.frame_size, animation.position, animation.rotation)
-        animation.current_frame += 1
+        if time == config.framerate:
+            animation.current_frame += 1
         if animation.current_frame >= animation.frame_number:
             animation.is_playing = False
             animation.current_frame = 0
             config.animations.remove(animation)
-        
+            
 
     for image in config.sprites:
         draw(image.image, image.size, image.position, image.rotation)    
@@ -126,7 +131,6 @@ def draw(image, size, position, rotation):
     config.screen.blit(rotated, rot_rect.topleft)
 
 
-time = 0
 
 clock = pygame.time.Clock()
 running = True
@@ -188,7 +192,7 @@ while running:
     animate()
 
 
-    if time >= 10:
+    if time >= config.framerate:
         time = 0
     
     pygame.display.flip()
