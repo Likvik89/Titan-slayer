@@ -12,9 +12,8 @@ m1_pressed = False
 m2_pressed = False
 
 #other variables
-
 screen = pygame.display.set_mode((1500 , 1000), 0)
-
+framerate = 5
 
 mouse_pos = 0
 mouse_direction = Vector2()
@@ -25,12 +24,6 @@ terrain_hitbox = []
 sprites = []
 animations = []
 
-
-def clamp(value, floor, celing):
-    return max(floor, min(celing, value))
-
-def angle_between():
-    pass
 
 
 
@@ -76,10 +69,11 @@ class collisionbox():
             
 
 class animation():
-    def __init__(self, animation, frame_size, frames):
+    def __init__(self, spiresheet, frame_size, frames, size):
         self.frame_size = frame_size
         self.position = Vector2(0,0)
         self.rotation = 0
+        self.size = size
 
         self.current_frame = 0
         self.frame_number = frames
@@ -88,7 +82,8 @@ class animation():
         self.animation = []
         for i in range(frames):
             frame_rect = pygame.Rect(0, frame_size * i, frame_size, frame_size)
-            frame = animation.subsurface(frame_rect).copy()
+            frame = spiresheet.subsurface(frame_rect).copy()
+            frame = pygame.transform.scale(frame, (size, size))
             self.animation.append(frame)
         
     def play(self, position, rotation):
@@ -101,7 +96,7 @@ class animation():
 
 
 class players(collisionbox):
-    def __init__(self,  size, position, image, friction, speed, max_range, turnspeed, screen):
+    def __init__(self,  size, position, image, friction, speed, max_range, screen, max_fuel, fuel_regen, fuel_usage):
         super().__init__(size, position, image, friction)
         self.boost_speed = speed
         self.is_boosting = False
@@ -109,35 +104,52 @@ class players(collisionbox):
         self.max_grapple_range = max_range
         self.grapple_range = 0
         self.image = pygame.transform.scale(self.image, (self.size, self.size))
-        self.turnspeed = turnspeed
         self.grapple_position = Vector2(400, 400)
         self.screen = screen
         self.is_attacking = False
         self.boost_anim = animation(pygame.image.load("animation/ODM_boste.png").convert_alpha(), #spritesheet
                                     16, #frame size
-                                    8 #number of frames
+                                    8, #number of frames
+                                    self.size #size
                                     )
         #self.slash = attacks()
+        self.fuel = max_fuel
+        self.max_fuel = max_fuel
+        self.fuel_regen = fuel_regen
+        self.fuel_usage = fuel_usage
 
     def boost(self):
+
+        if self.fuel > self.fuel_usage:
+            pass
         if w_pressed:
             self.is_boosting = True
+            self.boost_anim.play(Vector2(self.position.x + self.size/2, self.position.y + self.size), 180)
             self.velocity.y -= self.boost_speed
 
         if a_pressed:
             self.is_boosting = True
+            self.boost_anim.play(Vector2(self.position.x + self.size, self.position.y + self.size/2), -90)
             self.velocity.x -= self.boost_speed
 
         if  s_pressed:
             self.is_boosting = True
+            self.boost_anim.play(Vector2(self.position.x + self.size/2, self.position.y), 0)
             self.velocity.y += self.boost_speed
 
         if d_pressed:
             self.is_boosting = True
+            self.boost_anim.play(Vector2(self.position.x, self.position.y + self.size/2), 90)
             self.velocity.x += self.boost_speed
-        
+            
+        if not (w_pressed or a_pressed or s_pressed or d_pressed):
+            self.is_boosting = False
+
         if self.is_boosting:
-            self.boost_anim.play(Vector2(self.position.x, self.position.y + self.size), self.rotation)
+            self.fuel -= self.fuel_usage
+        elif not self.is_boosting and self.fuel < self.max_fuel:
+            self.fuel += self.fuel_regen
+
 
     def grapple_point(self, mouse_dir, bodies):
         self.is_grappling = True
