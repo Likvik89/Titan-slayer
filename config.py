@@ -121,7 +121,6 @@ class players(collisionbox):
     def boost(self):
 
         if self.fuel > self.fuel_usage:
-            pass
             if w_pressed:
                 self.is_boosting = True
                 self.boost_anim.play(Vector2(self.position.x + self.size/2, self.position.y + self.size), 180)

@@ -22,7 +22,7 @@ player = players(
                  300, #max grapple range
                  config.screen,
                  100, #maxfuel
-                 1, #fuel recharge
+                 0.05, #fuel recharge
                  1  #fuel consumption
                  )
 
@@ -70,11 +70,13 @@ def inputs():
             
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            player.grapple_point(config.mouse_direction, terrain_hitbox)
+            if event.button == 3:
+                player.grapple_point(config.mouse_direction, terrain_hitbox)
 
 
         elif event.type == pygame.MOUSEBUTTONUP:
-            player.is_grappling = False
+            if event.button == 3:
+                player.is_grappling = False
            
 
 def collision():
@@ -89,7 +91,7 @@ def collision():
 
 def generate_terrain():
     global pillar
-
+    global pillar2
 
     pillar = collisionbox(
                           200,#size
@@ -100,6 +102,16 @@ def generate_terrain():
     
     config.terrain_hitbox.append(pillar.hitbox)
     config.terrain.append(pillar)
+    
+    pillar2 = collisionbox(
+        200,
+        (1000, 300),
+        pygame.image.load("img/pillar_1.png").convert_alpha(),
+        0.5
+    )
+    config.terrain_hitbox.append(pillar2.hitbox)
+    config.terrain.append(pillar2)
+
 
 generate_terrain()
 
