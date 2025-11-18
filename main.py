@@ -12,7 +12,6 @@ width, height = config.screen.get_size()
 
 time = 0
 
-
 player = players(
                  40, #size
                  (200, 300), #start position
@@ -23,7 +22,7 @@ player = players(
                  config.screen,
                  100, #maxfuel
                  0.05, #fuel recharge
-                 1  #fuel consumption
+                 0.5  #fuel consumption
                  )
 
 

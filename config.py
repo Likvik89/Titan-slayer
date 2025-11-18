@@ -144,7 +144,7 @@ class players(collisionbox):
         if not (w_pressed or a_pressed or s_pressed or d_pressed):
             self.is_boosting = False
 
-        if self.is_boosting:
+        if self.is_boosting and self.fuel > self.fuel_usage:
             self.fuel -= self.fuel_usage
         elif not self.is_boosting and self.fuel < self.max_fuel:
             self.fuel += self.fuel_regen
