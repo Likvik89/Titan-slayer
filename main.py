@@ -123,6 +123,9 @@ def animate():
         pygame.draw.line(config.screen, string_color, (player.position.x + player.size/2, player.position.y + player.size/2), player.grapple_position, 1)    
     pygame.draw.circle(config.screen, (255, 0, 255), player.position, player.max_grapple_range, 1)
 
+    #boost guage
+    pygame.draw.rect(screen, (20, 150, 255), (30, 50, 50, 400*(player.fuel/player.max_fuel)))
+
 
 
 def draw(image, size, position, rotation):

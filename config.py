@@ -122,25 +122,25 @@ class players(collisionbox):
 
         if self.fuel > self.fuel_usage:
             pass
-        if w_pressed:
-            self.is_boosting = True
-            self.boost_anim.play(Vector2(self.position.x + self.size/2, self.position.y + self.size), 180)
-            self.velocity.y -= self.boost_speed
+            if w_pressed:
+                self.is_boosting = True
+                self.boost_anim.play(Vector2(self.position.x + self.size/2, self.position.y + self.size), 180)
+                self.velocity.y -= self.boost_speed
 
-        if a_pressed:
-            self.is_boosting = True
-            self.boost_anim.play(Vector2(self.position.x + self.size, self.position.y + self.size/2), -90)
-            self.velocity.x -= self.boost_speed
+            if a_pressed:
+                self.is_boosting = True
+                self.boost_anim.play(Vector2(self.position.x + self.size, self.position.y + self.size/2), -90)
+                self.velocity.x -= self.boost_speed
 
-        if  s_pressed:
-            self.is_boosting = True
-            self.boost_anim.play(Vector2(self.position.x + self.size/2, self.position.y), 0)
-            self.velocity.y += self.boost_speed
+            if  s_pressed:
+                self.is_boosting = True
+                self.boost_anim.play(Vector2(self.position.x + self.size/2, self.position.y), 0)
+                self.velocity.y += self.boost_speed
 
-        if d_pressed:
-            self.is_boosting = True
-            self.boost_anim.play(Vector2(self.position.x, self.position.y + self.size/2), 90)
-            self.velocity.x += self.boost_speed
+            if d_pressed:
+                self.is_boosting = True
+                self.boost_anim.play(Vector2(self.position.x, self.position.y + self.size/2), 90)
+                self.velocity.x += self.boost_speed
             
         if not (w_pressed or a_pressed or s_pressed or d_pressed):
             self.is_boosting = False
