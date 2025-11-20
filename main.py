@@ -87,6 +87,21 @@ def collision():
 
         player.collide(body)
 
+def update_attacks():
+    
+    for angreb in config.attacks: #tjekker alle aktive angreb
+        target_index = angreb.hitbox.collidelist(angreb.target_hitboxes) #hvad rammer den?
+
+        if target != -1: #har den ramt noget?
+            target = attack.targets[target_index]
+            target.damage()
+        
+        angreb.duration += 1
+        if angreb.duration >= attack.time_left:
+            angreb.attacker.is_attacking = False
+            angreb.attacks.remove(angreb)
+
+
 
 def generate_terrain():
     global pillar
@@ -204,7 +219,7 @@ while running:
 
     
     animate()
-
+    update_attacks()
 
     if time >= config.framerate:
         time = 0
