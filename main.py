@@ -2,6 +2,8 @@ import pygame
 from pygame.math import *
 import config
 from config import *
+import map
+from map import *
 import math
 
 
@@ -32,7 +34,7 @@ def inputs():
             running = False
         # Press ESC to exit fullscreen
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
+            if event.key == pygame.K_q:
                 running = False
 
             if event.key == pygame.K_w:  
@@ -52,7 +54,7 @@ def inputs():
             
             if event.key == pygame.K_SPACE:
                 player.grapple_point(config.mouse_direction, terrain_hitbox)
-
+            
 
             
         if event.type == pygame.KEYUP:
@@ -88,31 +90,10 @@ def collision():
         player.collide(body)
 
 
-def generate_terrain():
-    global pillar
-    global pillar2
-
-    pillar = collisionbox(
-                          200,#size
-                          (500, 500), #position
-                          pygame.image.load("img/pillar_5.png").convert_alpha(), #image
-                          0.5 #friction
-                        )
-    
-    config.terrain_hitbox.append(pillar.hitbox)
-    config.terrain.append(pillar)
-    
-    pillar2 = collisionbox(
-        200,
-        (1000, 300),
-        pygame.image.load("img/pillar_1.png").convert_alpha(),
-        0.5
-    )
-    config.terrain_hitbox.append(pillar2.hitbox)
-    config.terrain.append(pillar2)
-
 
 generate_terrain()
+
+print(config.terrain_hitbox)
 
 def animate():
 
@@ -163,6 +144,7 @@ while running:
 
     inputs()
     
+
 
     string_color = (0, 255, 0) #grøn
 
