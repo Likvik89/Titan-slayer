@@ -1,7 +1,6 @@
 import pygame
 from pygame.math import *
 
-
 #keys pressed
 w_pressed = False
 s_pressed = False
@@ -27,7 +26,6 @@ enemies_hitbox = []
 sprites = []
 animations = []
 attacks = []
-
 
 
 class collisionbox():
@@ -156,6 +154,7 @@ class players(collisionbox):
         self.fuel_regen = fuel_regen
         self.fuel_usage = fuel_usage
 
+
     def boost(self):
 
         if self.fuel > self.fuel_usage:
@@ -216,12 +215,8 @@ class players(collisionbox):
     
     def damage(self):
         print("YOU DIED")
- 
 
 
 class titan(collisionbox):
     def __init__(self, size, position, image):
         super().__init__(size, position, image)
-
-
-

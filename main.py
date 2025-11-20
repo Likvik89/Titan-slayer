@@ -9,7 +9,6 @@ import math
 
 pygame.init()
 
-
 width, height = config.screen.get_size()
 
 time = 0
@@ -34,7 +33,7 @@ def inputs():
             running = False
         # Press ESC to exit fullscreen
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_q:
+            if event.key == pygame.K_ESCAPE:
                 running = False
 
             if event.key == pygame.K_w:  
@@ -54,9 +53,7 @@ def inputs():
             
             if event.key == pygame.K_SPACE:
                 player.grapple_point(config.mouse_direction, terrain_hitbox)
-            
-
-            
+               
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_w:
                 config.w_pressed = False
@@ -69,11 +66,9 @@ def inputs():
             elif event.key == pygame.K_SPACE:
                 player.is_grappling = False
             
-
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 3:
                 player.grapple_point(config.mouse_direction, terrain_hitbox)
-
 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 3:
@@ -103,12 +98,8 @@ def update_attacks():
             angreb.attacker.is_attacking = False
             angreb.attacks.remove(angreb)
 
-
-
-
 generate_terrain()
 
-print(config.terrain_hitbox)
 
 def animate():
 
@@ -134,12 +125,10 @@ def animate():
     pygame.draw.rect(screen, (20, 150, 255), (30, 50, 50, 400*(player.fuel/player.max_fuel)))
 
 
-
 def draw(image, size, position, rotation):
     rotated = pygame.transform.rotate(image, rotation)
     rot_rect = rotated.get_rect(center=(position.x + size/2, position.y + size/2))
     config.screen.blit(rotated, rot_rect.topleft)
-
 
 
 clock = pygame.time.Clock()
@@ -156,15 +145,12 @@ while running:
     if player.velocity.length() != 0:
         player.direction = player.velocity.normalize()
     
-
     inputs()
-    
 
 
     string_color = (0, 255, 0) #grøn
 
     if (player.position.distance_to(player.grapple_position) > player.grapple_range) and player.is_grappling and player.velocity != [0,0]: #spiller grappler og er længere væk end grapple_range
-
 
         string_color = (255, 0, 0) #rød
 
@@ -190,7 +176,6 @@ while running:
         velocity = velocity * player.velocity.length() * sinv
         player.velocity = velocity
 
-    
     player.boost()
     collision()
 
@@ -198,7 +183,6 @@ while running:
     player.hitbox.x = player.position.x
     player.hitbox.y = player.position.y
     player.rotation = -(config.mouse_direction).as_polar()[1] - 90  
-
     
     animate()
     update_attacks()

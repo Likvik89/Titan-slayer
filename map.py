@@ -3,13 +3,11 @@ import random
 import config
 from config import *
 
-
 def generate_terrain():
     global pillar
 
     i = random.randint(5, 10)
     p = 0
-
 
     while p < i:
     
@@ -44,7 +42,3 @@ def generate_terrain():
             config.terrain_hitbox.append(pillar.hitbox)
             config.terrain.append(pillar)
             p += 1
-
-
-
-
