@@ -70,11 +70,12 @@ class collisionbox():
             
 
 class animation():
-    def __init__(self, spiresheet, frame_size, frames, size):
+    def __init__(self, spiresheet, frame_size, frames, owner):
         self.frame_size = frame_size
         self.position = Vector2(0,0)
         self.rotation = 0
-        self.size = size
+
+        self.owner = owner
 
         self.current_frame = 0
         self.frame_number = frames
@@ -84,7 +85,7 @@ class animation():
         for i in range(frames):
             frame_rect = pygame.Rect(0, frame_size * i, frame_size, frame_size)
             frame = spiresheet.subsurface(frame_rect).copy()
-            frame = pygame.transform.scale(frame, (size, size))
+            frame = pygame.transform.scale(frame, (owner.size, owner.size))
             self.animation.append(frame)
         
     def play(self, position, rotation):
@@ -96,13 +97,25 @@ class animation():
 
 
 class attack():
-    def __init__(self, animation, duration, hitbox, attacker, targets, targets_hitbox, cooldown):
+    def __init__(self, animation, duration, size, range, attacker, targets, targets_hitbox, cooldown):
         self.animation = animation
         self.time_left = duration
         self.duration = 0
-        self.hitbox = hitbox
+        self.owner = attacker
+
+        self.size = size
+        self.range = range
+        
+        self.hit_rect = pygame.Rect(size/2, size/2, size, size)
+        
+        self.hitbox = [
+            Vector2(self.hit_rect.topleft), 
+            Vector2(self.hit_rect.topright), 
+            Vector2(self.hit_rect.bottomleft), 
+            Vector2(self.hit_rect.bottomright)
+        ]
+
         self.target_hitboxes = targets_hitbox
-        self.attacker = attacker
         self.enemies = targets
         self.cooldown = cooldown
 
@@ -129,15 +142,15 @@ class players(collisionbox):
         self.boost_anim = animation(pygame.image.load("animation/ODM_boste.png").convert_alpha(), #spritesheet
                                     16, #frame size
                                     8, #number of frames
-                                    self.size #size
+                                    self #owner
                                     )
         
         #attack properties
-        slash_anim = animation(
+        self.slash_anim = animation(
             pygame.image.load("animation/player_attack.png").convert_alpha(), #spritesheet
             32, #frame dimensioner
             10, #antal frames
-            self.size #skalering
+            self #owner
         )
     #    self.slash = attack(
      #       slash_anim,
@@ -196,7 +209,7 @@ class players(collisionbox):
         #global new_grapple_position
         new_grapple_position = False
 
-        for body in terrain_hitbox:
+        for body in bodies:
             clipped_grapple_vector = body.clipline(grapple_start, grapple_end) #den del af snoren der overlapper terrain
 
             if (not clipped_grapple_vector): #snoren overlapper ikke terrain

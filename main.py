@@ -67,6 +67,9 @@ def inputs():
                 player.is_grappling = False
             
         if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                player.slash_anim.play(player.position, player.rotation)
+
             if event.button == 3:
                 player.grapple_point(config.mouse_direction, terrain_hitbox)
 
@@ -85,36 +88,47 @@ def collision():
         player.collide(body)
 
 def update_attacks():
-    
+  
     for angreb in config.attacks: #tjekker alle aktive angreb
-        target_index = angreb.hitbox.collidelist(angreb.target_hitboxes) #hvad rammer den?
 
-        if target != -1: #har den ramt noget?
-            target = attack.targets[target_index]
-            target.damage()
+        attack_center = (angreb.owner.direction * angreb.range) + angreb.owner.position
+
+        for point in angreb.hitbox:
+            
+            
+            pass
+
         
+
+
         angreb.duration += 1
         if angreb.duration >= attack.time_left:
             angreb.attacker.is_attacking = False
             angreb.attacks.remove(angreb)
 
+    draw
 generate_terrain()
 
 
 def animate():
 
+
+    for image in config.sprites:
+        draw(image.image, image.size, image.position, image.rotation)    
+
+
     for animation in config.animations:
+
         draw(animation.animation[animation.current_frame], animation.frame_size, animation.position, animation.rotation)
+
         if time == config.framerate:
-            animation.current_frame += 1
-        if animation.current_frame >= animation.frame_number:
+            animation.current_frame += 1 #next frame
+        
+        if animation.current_frame >= animation.frame_number: 
             animation.is_playing = False
             animation.current_frame = 0
             config.animations.remove(animation)
             
-
-    for image in config.sprites:
-        draw(image.image, image.size, image.position, image.rotation)    
 
     #grappling hook
     if player.is_grappling:
@@ -126,8 +140,8 @@ def animate():
 
 
 def draw(image, size, position, rotation):
-    rotated = pygame.transform.rotate(image, rotation)
-    rot_rect = rotated.get_rect(center=(position.x + size/2, position.y + size/2))
+    rotated = pygame.transform.rotate(image, rotation) #roterer
+    rot_rect = rotated.get_rect(center=(position.x + size/2, position.y + size/2)) #holder den i midten
     config.screen.blit(rotated, rot_rect.topleft)
 
 
@@ -144,7 +158,8 @@ while running:
     
     if player.velocity.length() != 0:
         player.direction = player.velocity.normalize()
-    
+    player.rotation = -(config.mouse_direction).as_polar()[1]
+
     inputs()
 
 
@@ -158,14 +173,6 @@ while running:
         velocity = player.velocity.rotate(-list(player.velocity.as_polar())[1])
         grapple = grapple_vector.rotate(-list(player.velocity.as_polar())[1])
 
-        #Beregner vinklen mellem vektorerne
-        leng = grapple.length()
-        lenv = (velocity).length()
-        dp = grapple.dot(velocity)
-        cosv = dp/(lenv*leng)
-        cosv = max(-1.0, min(1.0, cosv))
-        sinv = math.sin(math.acos(cosv))
-
         if grapple.y > 0:
             velocity = -Vector2(-grapple_vector.y, grapple_vector.x).normalize() #sætter hastigheden vinkelret på snoren
             
@@ -173,7 +180,7 @@ while running:
             velocity = Vector2(-grapple_vector.y, grapple_vector.x).normalize() #sætter hastigheden vinkelret på snoren
 
         
-        velocity = velocity * player.velocity.length() * sinv
+        velocity = velocity * player.velocity.length() 
         player.velocity = velocity
 
     player.boost()
